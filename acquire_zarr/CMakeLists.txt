@@ -5,8 +5,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
@@ -15,12 +13,19 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
+option(ACQUIRE_ZARR_INSTALL_DIR "Install Location of the Acquire Zarr library" "${CMAKE_CURRENT_SOURCE_DIR}/acquire_driver_zarr/install")
+
 add_executable(zarr_writer_node src/zarr_writer_node.cpp)
 ament_target_dependencies(zarr_writer_node rclcpp sensor_msgs)
 target_include_directories(zarr_writer_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+  ${ACQUIRE_ZARR_INSTALL_DIR}/include)
 target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+
+
+target_link_directories(zarr_writer_node PUBLIC ${ACQUIRE_ZARR_INSTALL_DIR}/lib)
+target_link_libraries(zarr_writer_node acquire-zarr) 
 
 install(TARGETS zarr_writer_node
   DESTINATION lib/${PROJECT_NAME})
