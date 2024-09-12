@@ -55,15 +55,20 @@ void ZarrWriterNode::settings_from_params()
   ZarrStreamSettings_set_data_type(this->zarr_stream_settings_, (ZarrDataType)data_type);
 
 
+  ZarrStreamSettings_reserve_dimensions(zarr_stream_settings_, 3);
+  ZarrStreamSettings_set_dimension(zarr_stream_settings_, 0, "t", 2, ZarrDimensionType_Time, 0, 1, 1);
+  ZarrStreamSettings_set_dimension(zarr_stream_settings_, 1, "y", 2, ZarrDimensionType_Space, 480, 480, 1);
+  ZarrStreamSettings_set_dimension(zarr_stream_settings_, 2, "x", 2, ZarrDimensionType_Space, 640, 640, 1);
+  
 
-
+  zarr_stream_ = ZarrStream_create(zarr_stream_settings_, ZarrVersion_2);
 
 }
 
-void ZarrWriterNode::topic_callback(const sensor_msgs::msg::Image & msg) const
+void ZarrWriterNode::topic_callback(const sensor_msgs::msg::Image & img) const
 {
-  //RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg.);
-  
+  size_t size_out = 0;
+  ZarrStream_append(zarr_stream_, img.data.data(), img.data.size(), &size_out);
 }
 
 int main(int argc, char * argv[])
