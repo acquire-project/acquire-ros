@@ -8,9 +8,14 @@
 #include "sensor_msgs/msg/image.hpp"
 
 #include "acquire_zarr/zarr_writer_node.hpp"
+#include "zarr.h"
 
 ZarrWriterNode::ZarrWriterNode(): Node("zarr_writer_node")
 {
+
+  settings_from_params();
+
+
   // manually enable topic statistics via options
   auto options = rclcpp::SubscriptionOptions();
   options.topic_stats_options.state = rclcpp::TopicStatisticsState::Enable;
@@ -27,6 +32,32 @@ ZarrWriterNode::ZarrWriterNode(): Node("zarr_writer_node")
 
   subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
     "image_raw", 10, callback, options);
+
+
+}
+
+ZarrWriterNode::~ZarrWriterNode()
+{
+  ZarrStreamSettings_destroy(zarr_stream_settings_);
+}
+
+void ZarrWriterNode::settings_from_params()
+{
+
+  zarr_stream_settings_ = ZarrStreamSettings_create();
+
+  this->declare_parameter<std::string>("store_path", "out.zarr");
+  auto store_path = this->get_parameter("store_path").as_string();
+  ZarrStreamSettings_set_store_path(this->zarr_stream_settings_, store_path.c_str(), store_path.size()+1);
+
+  this->declare_parameter<int>("data_type", (int)ZarrDataType_uint8);
+  auto data_type = this->get_parameter("data_type").as_int();
+  ZarrStreamSettings_set_data_type(this->zarr_stream_settings_, (ZarrDataType)data_type);
+
+
+
+
+
 }
 
 void ZarrWriterNode::topic_callback(const sensor_msgs::msg::Image & msg) const
