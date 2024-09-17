@@ -1,0 +1,33 @@
+/zarr_writer_node:
+  ros__parameters:
+    data_type: 0
+    dimension_chunk_px:
+    - 1
+    - 480
+    - 640
+    dimension_names:
+    - time
+    - y
+    - x
+    dimension_shard_chunks:
+    - 1
+    - 1
+    - 1
+    dimension_sizes:
+    - 0
+    - 480
+    - 640
+    dimension_types:
+    - 2
+    - 0
+    - 0
+    qos_overrides:
+      /parameter_events:
+        publisher:
+          depth: 1000
+          durability: volatile
+          history: keep_last
+          reliability: reliable
+    start_type_description_service: true
+    store_path: out.zarr
+    use_sim_time: false
