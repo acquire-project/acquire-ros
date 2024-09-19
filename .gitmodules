@@ -1,0 +1,7 @@
+[submodule "acquire_zarr/external/vcpkg"]
+	path = acquire_zarr/external/vcpkg
+	url = https://github.com/microsoft/vcpkg.git
+[submodule "acquire_zarr/external/acquire-driver-zarr"]
+	path = acquire_zarr/external/acquire-driver-zarr
+	url = https://github.com/acquire-project/acquire-driver-zarr.git
+	branch = afa9ace
