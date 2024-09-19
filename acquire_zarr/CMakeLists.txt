@@ -15,7 +15,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
 add_subdirectory(external)
-#option(ACQUIRE_ZARR_INSTALL_DIR "Install Location of the Acquire Zarr library" "${CMAKE_CURRENT_SOURCE_DIR}/acquire_driver_zarr/install")
+
 ExternalProject_Get_Property(acquire-driver-zarr INSTALL_DIR)
 set(ACQUIRE_ZARR_INSTALL_DIR ${INSTALL_DIR})
 add_library(zarr_writer_node SHARED src/zarr_writer_node.cpp)
