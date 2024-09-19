@@ -38,9 +38,9 @@ rclcpp_components_register_node(zarr_writer_node
   EXECUTABLE zarr_writer_node_exe)
 
 target_link_directories(zarr_writer_node PUBLIC $<BUILD_INTERFACE:${ACQUIRE_ZARR_INSTALL_DIR}/lib>)
-
 target_link_libraries(zarr_writer_node acquire-zarr) 
 
+# Install the library and executables
 ament_export_targets(export_zarr_writer_node)
 install(TARGETS zarr_writer_node
         EXPORT export_zarr_writer_node
@@ -48,6 +48,9 @@ install(TARGETS zarr_writer_node
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
 )
+
+# Install the external acquire-zarr library
+install(FILES ${ACQUIRE_ZARR_INSTALL_DIR}/lib/libacquire-zarr${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION lib)
 
 # Install launch & config files.
 install(DIRECTORY
