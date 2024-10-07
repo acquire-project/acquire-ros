@@ -5,3 +5,6 @@
 	path = acquire_zarr/external/acquire-driver-zarr
 	url = https://github.com/acquire-project/acquire-driver-zarr.git
 	branch = afa9ace
+[submodule "acquire_zarr/external/acquire-zarr-library"]
+	path = acquire_zarr/external/acquire-zarr-library
+	url = https://github.com/acquire-project/acquire-zarr.git
