@@ -14,14 +14,14 @@ set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 include(ExternalProject)
 
 # Define acquire-zarr-driver as an ExternalProject
-set(AZ_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/acquire-driver-zarr-build)
-set(AZ_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/acquire-driver-zarr-install)
+set(AZ_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/acquire-zarr-library-build)
+set(AZ_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/acquire-zarr-library-install)
 ExternalProject_Add(
-        acquire-driver-zarr
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/acquire-driver-zarr
+        acquire-zarr-library
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/acquire-zarr-library
         BINARY_DIR ${AZ_BUILD_DIR}
         INSTALL_DIR ${AZ_INSTALL_DIR}
-        CONFIGURE_COMMAND ${CMAKE_COMMAND} -B ${AZ_BUILD_DIR} -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake ${CMAKE_CURRENT_SOURCE_DIR}/acquire-driver-zarr
+        CONFIGURE_COMMAND ${CMAKE_COMMAND} -B ${AZ_BUILD_DIR} -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake ${CMAKE_CURRENT_SOURCE_DIR}/acquire-zarr-library
         INSTALL_COMMAND ${CMAKE_COMMAND} --install ${AZ_BUILD_DIR} --prefix ${AZ_INSTALL_DIR}
         COMMENT "Building acquire-zarr-driver"
         DEPENDS vcpkg

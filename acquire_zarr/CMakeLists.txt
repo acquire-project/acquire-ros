@@ -16,14 +16,14 @@ find_package(sensor_msgs REQUIRED)
 
 add_subdirectory(external)
 
-ExternalProject_Get_Property(acquire-driver-zarr INSTALL_DIR)
+ExternalProject_Get_Property(acquire-zarr-library INSTALL_DIR)
 set(ACQUIRE_ZARR_INSTALL_DIR ${INSTALL_DIR})
 add_library(zarr_writer_node SHARED src/zarr_writer_node.cpp)
 
 target_compile_definitions(zarr_writer_node PRIVATE "COMPOSITION_BUILDING_DLL")
 
 ament_target_dependencies(zarr_writer_node "rclcpp" "rclcpp_components" "sensor_msgs")
-add_dependencies(zarr_writer_node acquire-driver-zarr)
+add_dependencies(zarr_writer_node acquire-zarr-library)
 
 target_include_directories(zarr_writer_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -31,7 +31,7 @@ target_include_directories(zarr_writer_node PUBLIC
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
   )
 
-target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_20)  # Require C99 and C++20
 
 rclcpp_components_register_node(zarr_writer_node 
   PLUGIN "acquire_zarr::ZarrWriterNode" 

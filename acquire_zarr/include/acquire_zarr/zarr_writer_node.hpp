@@ -6,7 +6,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
-#include "zarr.h"
+#include "acquire.zarr.h"
 
 namespace acquire_zarr
 {
@@ -21,9 +21,13 @@ namespace acquire_zarr
     void topic_callback(const sensor_msgs::msg::Image & msg) const;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
 
-    // unfortunately, this has to be a dumb pointer because of the aligned storage.
-    ZarrStreamSettings* zarr_stream_settings_;
-    ZarrStream* zarr_stream_;
+    ZarrStreamSettings zarr_stream_settings_ = {};
+    ZarrStream* zarr_stream_ = nullptr;
+
+    // string variables which are members so the memory can persist 
+    // throughout the lifetime of the node
+    std::string store_path_;
+    std::vector<std::string> dimension_names_;
   };
 
 }  // namespace acquire_zarr
