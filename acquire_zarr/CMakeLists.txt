@@ -50,7 +50,11 @@ install(TARGETS zarr_writer_node
 )
 
 # Install the external acquire-zarr library
-install(FILES ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-zarr${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION lib)
+install(FILES 
+  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-zarr${CMAKE_SHARED_LIBRARY_SUFFIX} 
+  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-logger${CMAKE_SHARED_LIBRARY_SUFFIX} 
+  DESTINATION 
+  lib)
 
 # Install launch & config files.
 install(DIRECTORY
