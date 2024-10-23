@@ -13,9 +13,7 @@ namespace acquire_zarr
 {
   ZarrWriterNode::ZarrWriterNode(const rclcpp::NodeOptions node_options): Node("zarr_writer_node", node_options)
   {
-
     settings_from_params();
-
 
     // manually enable topic statistics via options
     auto options = rclcpp::SubscriptionOptions();
@@ -44,7 +42,17 @@ namespace acquire_zarr
   void ZarrWriterNode::settings_from_params()
   {
 
-    zarr_stream_settings_.version = ZarrVersion_2;
+    this->declare_parameter<int>("zarr_version", 2);
+    try
+    {
+      ZarrVersion zarr_version = (ZarrVersion)this->get_parameter("zarr_version").as_int();
+      zarr_stream_settings_.version = zarr_version;
+    }
+    catch(const rclcpp::ParameterTypeException& e)
+    {
+      RCLCPP_WARN(this->get_logger(), "Invalid zarr_version parameter, defaulting to ZarrVersion_2");
+      zarr_stream_settings_.version = ZarrVersion_2;
+    }
 
     this->declare_parameter<std::string>("store_path", "out.zarr");
     store_path_ = this->get_parameter("store_path").as_string();

@@ -35,6 +35,7 @@ def generate_launch_description():
         package='acquire_zarr', 
         executable='zarr_writer_node_exe', 
         parameters=[{
+            'zarr_version': 3,
             'zarr_path': zarr_out_path,
             'dimension_sizes': [0, image_height, image_width],
             'chunk_sizes': [1, image_height, image_width],
