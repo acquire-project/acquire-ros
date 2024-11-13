@@ -11,11 +11,10 @@
 
 namespace acquire_zarr
 {
-  ZarrWriterNode::ZarrWriterNode(const rclcpp::NodeOptions node_options): Node("zarr_writer_node", node_options)
+  ZarrWriterNode::ZarrWriterNode(const rclcpp::NodeOptions node_options) : Node("zarr_writer_node", node_options)
   {
 
     settings_from_params();
-
 
     // manually enable topic statistics via options
     auto options = rclcpp::SubscriptionOptions();
@@ -27,18 +26,22 @@ namespace acquire_zarr
     // configure the topic name (default '/statistics')
     // options.topic_stats_options.publish_topic = "/topic_statistics";
 
-    auto callback = [this](const sensor_msgs::msg::Image & msg) {
-        this->topic_callback(msg);
-      };
+    auto callback = [this](const sensor_msgs::msg::Image &msg)
+    {
+      this->topic_callback(msg);
+    };
 
     subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-      "image_raw", 10, callback, options);
-
+        "image_raw", 10, callback, options);
   }
 
   ZarrWriterNode::~ZarrWriterNode()
   {
     ZarrStreamSettings_destroy_dimension_array(&zarr_stream_settings_);
+    if (zarr_stream_ != nullptr)
+    {
+      ZarrStream_destroy(zarr_stream_);
+    }
   }
 
   void ZarrWriterNode::settings_from_params()
@@ -53,7 +56,6 @@ namespace acquire_zarr
     this->declare_parameter<int>("data_type", (int)ZarrDataType_uint8);
     auto data_type = this->get_parameter("data_type").as_int();
     this->zarr_stream_settings_.data_type = (ZarrDataType)data_type;
-
 
     this->declare_parameter("dimension_names", std::vector<std::string>{"t", "y", "x"});
     dimension_names_ = this->get_parameter("dimension_names").as_string_array();
@@ -72,28 +74,26 @@ namespace acquire_zarr
     auto dimension_shard_chunks = this->get_parameter("dimension_shard_chunks").as_integer_array();
 
     ZarrStreamSettings_create_dimension_array(&zarr_stream_settings_, n_dimensions);
-    for(size_t i = 0; i < n_dimensions; i++)
+    for (size_t i = 0; i < n_dimensions; i++)
     {
 
       zarr_stream_settings_.dimensions[i] = {
-        dimension_names_[i].c_str(),
-        (ZarrDimensionType)dimension_types[i],
-        (uint32_t)dimension_sizes[i],
-        (uint32_t)dimension_chunk_px_sizes[i],
-        (uint32_t)dimension_shard_chunks[i]
-      };
+          dimension_names_[i].c_str(),
+          (ZarrDimensionType)dimension_types[i],
+          (uint32_t)dimension_sizes[i],
+          (uint32_t)dimension_chunk_px_sizes[i],
+          (uint32_t)dimension_shard_chunks[i]};
     }
 
     zarr_stream_ = ZarrStream_create(&zarr_stream_settings_);
-
   }
 
-  void ZarrWriterNode::topic_callback(const sensor_msgs::msg::Image & img) const
+  void ZarrWriterNode::topic_callback(const sensor_msgs::msg::Image &img) const
   {
     size_t size_out = 0;
     ZarrStream_append(zarr_stream_, img.data.data(), img.data.size(), &size_out);
   }
-}  // namespace acquire_zarr
+} // namespace acquire_zarr
 
 #include "rclcpp_components/register_node_macro.hpp"
 
