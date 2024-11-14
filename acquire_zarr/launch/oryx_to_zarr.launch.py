@@ -40,7 +40,7 @@ def launch_setup(context, *args, **kwargs):
         package='acquire_zarr', 
         executable='zarr_writer_node_exe', 
         parameters=[{
-            'store_path': LaunchConfig('zarr_out_path'),
+            'zarr_out_path': LaunchConfig('zarr_out_path'),
             'dimension_sizes': [0, LaunchConfig('image_height'), LaunchConfig('image_width')],
             'chunk_sizes': [1, LaunchConfig('image_height'), LaunchConfig('image_width')],
         }],

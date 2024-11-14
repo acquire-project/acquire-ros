@@ -49,8 +49,8 @@ namespace acquire_zarr
 
     zarr_stream_settings_.version = ZarrVersion_2;
 
-    this->declare_parameter<std::string>("store_path", "out.zarr");
-    store_path_ = this->get_parameter("store_path").as_string();
+    this->declare_parameter<std::string>("zarr_out_path", "out.zarr");
+    store_path_ = this->get_parameter("zarr_out_path").as_string();
     zarr_stream_settings_.store_path = store_path_.c_str();
 
     this->declare_parameter<int>("data_type", (int)ZarrDataType_uint8);
