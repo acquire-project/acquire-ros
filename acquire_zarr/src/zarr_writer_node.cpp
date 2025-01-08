@@ -1,13 +1,14 @@
 
-#include <chrono>
+#include <functional>
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/subscription_options.hpp"
 
-#include "sensor_msgs/msg/image.hpp"
-
 #include "acquire_zarr/zarr_writer_node.hpp"
+
+using std::placeholders::_1;
+
 
 namespace acquire_zarr
 {
@@ -16,23 +17,16 @@ namespace acquire_zarr
 
     settings_from_params();
 
-    // manually enable topic statistics via options
-    auto options = rclcpp::SubscriptionOptions();
-    options.topic_stats_options.state = rclcpp::TopicStatisticsState::Enable;
+    image_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
+      "image_raw", 
+      10, 
+      std::bind(&ZarrWriterNode::image_cb, this, _1));
 
-    // configure the collection window and publish period (default 1s)
-    options.topic_stats_options.publish_period = std::chrono::seconds(5);
+    float_array_sub_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
+      "float32_volume", 
+      10, 
+      std::bind(&ZarrWriterNode::float_array_cb, this, _1));
 
-    // configure the topic name (default '/statistics')
-    // options.topic_stats_options.publish_topic = "/topic_statistics";
-
-    auto callback = [this](const sensor_msgs::msg::Image &msg)
-    {
-      this->topic_callback(msg);
-    };
-
-    subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-        "image_raw", 10, callback, options);
   }
 
   ZarrWriterNode::~ZarrWriterNode()
@@ -88,10 +82,22 @@ namespace acquire_zarr
     zarr_stream_ = ZarrStream_create(&zarr_stream_settings_);
   }
 
-  void ZarrWriterNode::topic_callback(const sensor_msgs::msg::Image &img) const
+
+  void ZarrWriterNode::image_cb(const sensor_msgs::msg::Image & msg) const
   {
     size_t size_out = 0;
-    ZarrStream_append(zarr_stream_, img.data.data(), img.data.size(), &size_out);
+    ZarrStream_append(zarr_stream_, msg.data.data(), msg.data.size(), &size_out);
+  }
+
+  void ZarrWriterNode::float_array_cb(const std_msgs::msg::Float32MultiArray & msg) const
+  {
+    size_t size_out = 0;
+
+    if (msg.layout.dim.size() != zarr_stream_settings_.dimension_count-1)
+    {
+      throw std::runtime_error("Float32MultiArray topic dimensions do not match Zarr dimensions");
+    }
+    ZarrStream_append(zarr_stream_, msg.data.data(), msg.data.size(), &size_out);
   }
 } // namespace acquire_zarr
 
