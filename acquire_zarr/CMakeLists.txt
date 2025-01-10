@@ -34,7 +34,7 @@ target_include_directories(zarr_writer_node PUBLIC
 target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_20)  # Require C99 and C++20
 
 rclcpp_components_register_node(zarr_writer_node 
-  PLUGIN "acquire_zarr::ZarrWriterNode" 
+  PLUGIN "acquire_zarr::ImageZarrWriterNode" 
   EXECUTABLE zarr_writer_node_exe)
 
 target_link_directories(zarr_writer_node PUBLIC $<BUILD_INTERFACE:${ACQUIRE_ZARR_INSTALL_DIR}/lib>)

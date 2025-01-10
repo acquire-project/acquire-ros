@@ -87,6 +87,7 @@ namespace acquire_zarr
     ZarrStream_append(zarr_stream_, msg.data.data(), msg.data.size(), &size_out);
   }
 
+  using ImageZarrWriterNode = ZarrWriterNode<sensor_msgs::msg::Image>;
 } // namespace acquire_zarr
 
 #include "rclcpp_components/register_node_macro.hpp"
@@ -94,4 +95,5 @@ namespace acquire_zarr
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(acquire_zarr::ZarrWriterNode<sensor_msgs::msg::Image>)
+
+RCLCPP_COMPONENTS_REGISTER_NODE(acquire_zarr::ImageZarrWriterNode)
