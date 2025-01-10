@@ -1,13 +1,14 @@
 
-#include <chrono>
+#include <functional>
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/subscription_options.hpp"
 
-#include "sensor_msgs/msg/image.hpp"
-
 #include "acquire_zarr/zarr_writer_node.hpp"
+
+using std::placeholders::_1;
+
 
 namespace acquire_zarr
 {
@@ -16,23 +17,10 @@ namespace acquire_zarr
 
     settings_from_params();
 
-    // manually enable topic statistics via options
-    auto options = rclcpp::SubscriptionOptions();
-    options.topic_stats_options.state = rclcpp::TopicStatisticsState::Enable;
-
-    // configure the collection window and publish period (default 1s)
-    options.topic_stats_options.publish_period = std::chrono::seconds(5);
-
-    // configure the topic name (default '/statistics')
-    // options.topic_stats_options.publish_topic = "/topic_statistics";
-
-    auto callback = [this](const sensor_msgs::msg::Image &msg)
-    {
-      this->topic_callback(msg);
-    };
-
-    subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-        "image_raw", 10, callback, options);
+    image_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
+      "image_raw", 
+      10, 
+      std::bind(&ZarrWriterNode::topic_callback, this, _1));
   }
 
   ZarrWriterNode::~ZarrWriterNode()
@@ -88,11 +76,13 @@ namespace acquire_zarr
     zarr_stream_ = ZarrStream_create(&zarr_stream_settings_);
   }
 
-  void ZarrWriterNode::topic_callback(const sensor_msgs::msg::Image &img) const
+
+  void ZarrWriterNode::topic_callback(const sensor_msgs::msg::Image & msg) const
   {
     size_t size_out = 0;
-    ZarrStream_append(zarr_stream_, img.data.data(), img.data.size(), &size_out);
+    ZarrStream_append(zarr_stream_, msg.data.data(), msg.data.size(), &size_out);
   }
+
 } // namespace acquire_zarr
 
 #include "rclcpp_components/register_node_macro.hpp"

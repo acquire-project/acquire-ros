@@ -18,8 +18,10 @@ namespace acquire_zarr
     ~ZarrWriterNode();
   private:
     void settings_from_params();
+
     void topic_callback(const sensor_msgs::msg::Image & msg) const;
-    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
+
+    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
 
     ZarrStreamSettings zarr_stream_settings_ = {};
     ZarrStream* zarr_stream_ = nullptr;
