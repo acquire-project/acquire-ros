@@ -12,18 +12,21 @@ using std::placeholders::_1;
 
 namespace acquire_zarr
 {
-  ZarrWriterNode::ZarrWriterNode(const rclcpp::NodeOptions node_options) : Node("zarr_writer_node", node_options)
+  template <typename T>
+  ZarrWriterNode<T>::ZarrWriterNode(const rclcpp::NodeOptions node_options) : Node("zarr_writer_node", node_options)
   {
 
     settings_from_params();
 
-    image_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
-      "image_raw", 
+    image_sub_ = this->create_subscription<T>(
+      "image_data", 
       10, 
       std::bind(&ZarrWriterNode::topic_callback, this, _1));
+
   }
 
-  ZarrWriterNode::~ZarrWriterNode()
+  template <typename T>
+  ZarrWriterNode<T>::~ZarrWriterNode()
   {
     ZarrStreamSettings_destroy_dimension_array(&zarr_stream_settings_);
     if (zarr_stream_ != nullptr)
@@ -32,7 +35,8 @@ namespace acquire_zarr
     }
   }
 
-  void ZarrWriterNode::settings_from_params()
+  template <typename T> 
+  void ZarrWriterNode<T>::settings_from_params()
   {
 
     zarr_stream_settings_.version = ZarrVersion_2;
@@ -76,8 +80,8 @@ namespace acquire_zarr
     zarr_stream_ = ZarrStream_create(&zarr_stream_settings_);
   }
 
-
-  void ZarrWriterNode::topic_callback(const sensor_msgs::msg::Image & msg) const
+  template <typename T> 
+  void ZarrWriterNode<T>::topic_callback(const T & msg) const
   {
     size_t size_out = 0;
     ZarrStream_append(zarr_stream_, msg.data.data(), msg.data.size(), &size_out);
@@ -90,4 +94,4 @@ namespace acquire_zarr
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(acquire_zarr::ZarrWriterNode)
+RCLCPP_COMPONENTS_REGISTER_NODE(acquire_zarr::ZarrWriterNode<sensor_msgs::msg::Image>)
