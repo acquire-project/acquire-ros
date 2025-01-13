@@ -4,6 +4,8 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/subscription_options.hpp"
+#include "sensor_msgs/msg/image.hpp"
+#include "std_msgs/msg/float32_multi_array.hpp"
 
 #include "acquire_zarr/zarr_writer_node.hpp"
 
@@ -80,14 +82,40 @@ namespace acquire_zarr
     zarr_stream_ = ZarrStream_create(&zarr_stream_settings_);
   }
 
-  template <typename T> 
-  void ZarrWriterNode<T>::topic_callback(const T & msg) const
+  template <> 
+  void ZarrWriterNode<sensor_msgs::msg::Image>::topic_callback(const sensor_msgs::msg::Image& msg) const
   {
     size_t size_out = 0;
     ZarrStream_append(zarr_stream_, msg.data.data(), msg.data.size(), &size_out);
   }
 
+  template <typename T> 
+  void ZarrWriterNode<T>::topic_callback(const T & msg) const
+  {
+    if (msg.layout.dim.size() != zarr_stream_settings_.dimension_count-1)
+    {
+      throw std::runtime_error("MultiArray topic dimensions do not match Zarr dimensions");
+    }
+    
+    size_t size_in = sizeof(msg.data[0]), size_out = 0;
+    for (size_t i = 0; i < msg.layout.dim.size(); i++)
+    {
+      if(msg.layout.dim[i].size != zarr_stream_settings_.dimensions[i+1].array_size_px)
+      {
+        throw std::runtime_error("MultiArray topic dimensions do not match Zarr dimensions");
+      }
+      size_in *= msg.layout.dim[i].size;
+    }
+    ZarrStream_append(zarr_stream_, msg.data.data(), size_in, &size_out);
+
+    if(size_out != size_in)
+    {
+      throw std::runtime_error("ZarrStream_append did not write the correct number of bytes");
+    }
+  }
+
   using ImageZarrWriterNode = ZarrWriterNode<sensor_msgs::msg::Image>;
+  using Float32MultiArrayZarrWriterNode = ZarrWriterNode<std_msgs::msg::Float32MultiArray>;
 } // namespace acquire_zarr
 
 #include "rclcpp_components/register_node_macro.hpp"
@@ -97,3 +125,4 @@ namespace acquire_zarr
 // is being loaded into a running process.
 
 RCLCPP_COMPONENTS_REGISTER_NODE(acquire_zarr::ImageZarrWriterNode)
+RCLCPP_COMPONENTS_REGISTER_NODE(acquire_zarr::Float32MultiArrayZarrWriterNode)

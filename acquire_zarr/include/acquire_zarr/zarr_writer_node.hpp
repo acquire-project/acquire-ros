@@ -5,7 +5,6 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/image.hpp"
 #include "acquire.zarr.h"
 
 namespace acquire_zarr
