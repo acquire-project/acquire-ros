@@ -1,6 +1,7 @@
 
 #include <functional>
 #include <memory>
+#include <typeinfo>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/subscription_options.hpp"
@@ -47,9 +48,20 @@ namespace acquire_zarr
     store_path_ = this->get_parameter("zarr_out_path").as_string();
     zarr_stream_settings_.store_path = store_path_.c_str();
 
-    this->declare_parameter<int>("data_type", (int)ZarrDataType_uint8);
-    auto data_type = this->get_parameter("data_type").as_int();
-    this->zarr_stream_settings_.data_type = (ZarrDataType)data_type;
+    // infer zarr data type from template type
+    if (typeid(T) == typeid(sensor_msgs::msg::Image))
+    {
+      // todo: add support for 16 bit images
+      zarr_stream_settings_.data_type = ZarrDataType_uint8;
+    }
+    else if (typeid(T) == typeid(std_msgs::msg::Float32MultiArray))
+    {
+      zarr_stream_settings_.data_type = ZarrDataType_float32;
+    }
+    else
+    {
+      throw std::runtime_error("Unsupported data type");
+    }
 
     this->declare_parameter("dimension_names", std::vector<std::string>{"t", "y", "x"});
     dimension_names_ = this->get_parameter("dimension_names").as_string_array();
