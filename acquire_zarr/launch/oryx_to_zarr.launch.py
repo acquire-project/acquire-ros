@@ -38,7 +38,7 @@ def launch_setup(context, *args, **kwargs):
     
     zarr_writer_node = Node(
         package='acquire_zarr', 
-        executable='zarr_writer_node_exe', 
+        executable='image_zarr_writer_node', 
         parameters=[{
             'zarr_out_path': LaunchConfig('zarr_out_path'),
             'dimension_sizes': [0, LaunchConfig('image_height'), LaunchConfig('image_width')],

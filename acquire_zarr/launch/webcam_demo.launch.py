@@ -28,7 +28,7 @@ def generate_launch_description():
 
     zarr_writer_node = Node(
         package='acquire_zarr', 
-        executable='zarr_writer_node_exe', 
+        executable='image_zarr_writer_node', 
         parameters=[{
             'zarr_path': zarr_out_path,
             'dimension_sizes': [0, image_height, image_width],

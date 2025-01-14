@@ -36,7 +36,7 @@ target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_20)  # Require 
 
 rclcpp_components_register_node(zarr_writer_node 
   PLUGIN "acquire_zarr::ImageZarrWriterNode" 
-  EXECUTABLE zarr_writer_node_exe)
+  EXECUTABLE image_zarr_writer_node)
 
 rclcpp_components_register_node(zarr_writer_node 
   PLUGIN "acquire_zarr::Float32MultiArrayZarrWriterNode" 
