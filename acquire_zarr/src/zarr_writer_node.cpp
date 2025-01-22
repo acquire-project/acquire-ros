@@ -1,7 +1,6 @@
 
 #include <functional>
 #include <memory>
-#include <typeinfo>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/subscription_options.hpp"
@@ -49,12 +48,12 @@ namespace acquire_zarr
     zarr_stream_settings_.store_path = store_path_.c_str();
 
     // infer zarr data type from template type
-    if (typeid(T) == typeid(sensor_msgs::msg::Image))
+    if constexpr (std::is_same_v<T, sensor_msgs::msg::Image>)
     {
       // todo: add support for 16 bit images
       zarr_stream_settings_.data_type = ZarrDataType_uint8;
     }
-    else if (typeid(T) == typeid(std_msgs::msg::Float32MultiArray))
+    else if constexpr (std::is_same_v<T, std_msgs::msg::Float32MultiArray>)
     {
       zarr_stream_settings_.data_type = ZarrDataType_float32;
     }
