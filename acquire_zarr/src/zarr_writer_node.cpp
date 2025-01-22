@@ -1,41 +1,35 @@
 
-#include <chrono>
+#include <functional>
 #include <memory>
+#include <typeinfo>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/subscription_options.hpp"
-
 #include "sensor_msgs/msg/image.hpp"
+#include "std_msgs/msg/float32_multi_array.hpp"
 
 #include "acquire_zarr/zarr_writer_node.hpp"
 
+using std::placeholders::_1;
+
+
 namespace acquire_zarr
 {
-  ZarrWriterNode::ZarrWriterNode(const rclcpp::NodeOptions node_options) : Node("zarr_writer_node", node_options)
+  template <typename T>
+  ZarrWriterNode<T>::ZarrWriterNode(const rclcpp::NodeOptions node_options) : Node("zarr_writer_node", node_options)
   {
 
     settings_from_params();
 
-    // manually enable topic statistics via options
-    auto options = rclcpp::SubscriptionOptions();
-    options.topic_stats_options.state = rclcpp::TopicStatisticsState::Enable;
+    image_sub_ = this->create_subscription<T>(
+      "image_data", 
+      10, 
+      std::bind(&ZarrWriterNode::topic_callback, this, _1));
 
-    // configure the collection window and publish period (default 1s)
-    options.topic_stats_options.publish_period = std::chrono::seconds(5);
-
-    // configure the topic name (default '/statistics')
-    // options.topic_stats_options.publish_topic = "/topic_statistics";
-
-    auto callback = [this](const sensor_msgs::msg::Image &msg)
-    {
-      this->topic_callback(msg);
-    };
-
-    subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-        "image_raw", 10, callback, options);
   }
 
-  ZarrWriterNode::~ZarrWriterNode()
+  template <typename T>
+  ZarrWriterNode<T>::~ZarrWriterNode()
   {
     ZarrStreamSettings_destroy_dimension_array(&zarr_stream_settings_);
     if (zarr_stream_ != nullptr)
@@ -44,7 +38,8 @@ namespace acquire_zarr
     }
   }
 
-  void ZarrWriterNode::settings_from_params()
+  template <typename T> 
+  void ZarrWriterNode<T>::settings_from_params()
   {
 
     zarr_stream_settings_.version = ZarrVersion_2;
@@ -53,9 +48,20 @@ namespace acquire_zarr
     store_path_ = this->get_parameter("zarr_out_path").as_string();
     zarr_stream_settings_.store_path = store_path_.c_str();
 
-    this->declare_parameter<int>("data_type", (int)ZarrDataType_uint8);
-    auto data_type = this->get_parameter("data_type").as_int();
-    this->zarr_stream_settings_.data_type = (ZarrDataType)data_type;
+    // infer zarr data type from template type
+    if (typeid(T) == typeid(sensor_msgs::msg::Image))
+    {
+      // todo: add support for 16 bit images
+      zarr_stream_settings_.data_type = ZarrDataType_uint8;
+    }
+    else if (typeid(T) == typeid(std_msgs::msg::Float32MultiArray))
+    {
+      zarr_stream_settings_.data_type = ZarrDataType_float32;
+    }
+    else
+    {
+      throw std::runtime_error("Unsupported data type");
+    }
 
     this->declare_parameter("dimension_names", std::vector<std::string>{"t", "y", "x"});
     dimension_names_ = this->get_parameter("dimension_names").as_string_array();
@@ -88,11 +94,40 @@ namespace acquire_zarr
     zarr_stream_ = ZarrStream_create(&zarr_stream_settings_);
   }
 
-  void ZarrWriterNode::topic_callback(const sensor_msgs::msg::Image &img) const
+  template <> 
+  void ZarrWriterNode<sensor_msgs::msg::Image>::topic_callback(const sensor_msgs::msg::Image& msg) const
   {
     size_t size_out = 0;
-    ZarrStream_append(zarr_stream_, img.data.data(), img.data.size(), &size_out);
+    ZarrStream_append(zarr_stream_, msg.data.data(), msg.data.size(), &size_out);
   }
+
+  template <typename T> 
+  void ZarrWriterNode<T>::topic_callback(const T & msg) const
+  {
+    if (msg.layout.dim.size() != zarr_stream_settings_.dimension_count-1)
+    {
+      throw std::runtime_error("MultiArray topic dimensions do not match Zarr dimensions");
+    }
+    
+    size_t size_in = sizeof(msg.data[0]), size_out = 0;
+    for (size_t i = 0; i < msg.layout.dim.size(); i++)
+    {
+      if(msg.layout.dim[i].size != zarr_stream_settings_.dimensions[i+1].array_size_px)
+      {
+        throw std::runtime_error("MultiArray topic dimensions do not match Zarr dimensions");
+      }
+      size_in *= msg.layout.dim[i].size;
+    }
+    ZarrStream_append(zarr_stream_, msg.data.data(), size_in, &size_out);
+
+    if(size_out != size_in)
+    {
+      throw std::runtime_error("ZarrStream_append did not write the correct number of bytes");
+    }
+  }
+
+  using ImageZarrWriterNode = ZarrWriterNode<sensor_msgs::msg::Image>;
+  using Float32MultiArrayZarrWriterNode = ZarrWriterNode<std_msgs::msg::Float32MultiArray>;
 } // namespace acquire_zarr
 
 #include "rclcpp_components/register_node_macro.hpp"
@@ -100,4 +135,6 @@ namespace acquire_zarr
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(acquire_zarr::ZarrWriterNode)
+
+RCLCPP_COMPONENTS_REGISTER_NODE(acquire_zarr::ImageZarrWriterNode)
+RCLCPP_COMPONENTS_REGISTER_NODE(acquire_zarr::Float32MultiArrayZarrWriterNode)

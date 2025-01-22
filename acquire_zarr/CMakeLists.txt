@@ -13,6 +13,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 add_subdirectory(external)
 
@@ -22,7 +23,7 @@ add_library(zarr_writer_node SHARED src/zarr_writer_node.cpp)
 
 target_compile_definitions(zarr_writer_node PRIVATE "COMPOSITION_BUILDING_DLL")
 
-ament_target_dependencies(zarr_writer_node "rclcpp" "rclcpp_components" "sensor_msgs")
+ament_target_dependencies(zarr_writer_node "rclcpp" "rclcpp_components" "sensor_msgs" "std_msgs")
 add_dependencies(zarr_writer_node acquire-zarr-library)
 
 target_include_directories(zarr_writer_node PUBLIC
@@ -34,8 +35,12 @@ target_include_directories(zarr_writer_node PUBLIC
 target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_20)  # Require C99 and C++20
 
 rclcpp_components_register_node(zarr_writer_node 
-  PLUGIN "acquire_zarr::ZarrWriterNode" 
-  EXECUTABLE zarr_writer_node_exe)
+  PLUGIN "acquire_zarr::ImageZarrWriterNode" 
+  EXECUTABLE image_zarr_writer_node)
+
+rclcpp_components_register_node(zarr_writer_node 
+  PLUGIN "acquire_zarr::Float32MultiArrayZarrWriterNode" 
+  EXECUTABLE float_volume_zarr_writer)
 
 target_link_directories(zarr_writer_node PUBLIC $<BUILD_INTERFACE:${ACQUIRE_ZARR_INSTALL_DIR}/lib>)
 target_link_libraries(zarr_writer_node acquire-zarr) 

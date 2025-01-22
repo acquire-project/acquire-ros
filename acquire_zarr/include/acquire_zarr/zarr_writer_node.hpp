@@ -5,12 +5,11 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/image.hpp"
 #include "acquire.zarr.h"
 
 namespace acquire_zarr
 {
-
+  template <typename T>
   class ZarrWriterNode : public rclcpp::Node
   {
   public:
@@ -18,8 +17,10 @@ namespace acquire_zarr
     ~ZarrWriterNode();
   private:
     void settings_from_params();
-    void topic_callback(const sensor_msgs::msg::Image & msg) const;
-    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
+
+    void topic_callback(const T & msg) const;
+
+    rclcpp::Subscription<T>::SharedPtr image_sub_;
 
     ZarrStreamSettings zarr_stream_settings_ = {};
     ZarrStream* zarr_stream_ = nullptr;
