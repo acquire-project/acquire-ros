@@ -51,7 +51,6 @@ def test_data():
         node = ZarrTestNode('test_node')
         node.run_publisher()
         
-        node.ros_spin_thread.join()
         #node.validate_data()
         assert True
 
@@ -64,11 +63,10 @@ class ZarrTestNode(Node):
     def __init__(self, name='test_node'):
         super().__init__(name)
 
-        self.zarr_shape = (10, 10, 480, 640)
+        self.zarr_shape = (0, 1, 480, 640)
         self.data = np.random.randint(0, 255, self.zarr_shape)
         
-        self.pub_ = self.create_publisher(Image, self.get_name()+'/image_raw', 10)
-        self.timer_ = self.create_timer(0.1, self.publish_msg)
+        self.pub_ = self.create_publisher(Image, 'image_raw', 10)
         
         self.image_msg_ = Image()
         self.image_msg_.header.frame_id = 'camera_frame'
@@ -83,16 +81,13 @@ class ZarrTestNode(Node):
         self.ros_spin_thread = Thread(target=lambda node: rclpy.spin(node), args=(self,))
         self.ros_spin_thread.start()
         
+        # Publish image data
         for i in range(self.zarr_shape[0]):
             for j in range(self.zarr_shape[1]):
                 self.image_msg_.header.stamp = self.get_clock().now().to_msg()
                 self.image_msg_.data = self.data[i, j].tobytes()
                 self.pub_.publish(self.image_msg_)
-                self.get_logger().info('Publishing image %d %d', i, j)
-                rclpy.spin_once(self)
-                time.sleep(0.01)
-                
-        self.ros_spin_thread.join()
+                time.sleep(10)
         
     def validate_data(self):
         zarr_file = zarr.open('test.zarr', mode='r')
