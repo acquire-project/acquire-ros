@@ -57,7 +57,6 @@ install(TARGETS zarr_writer_node
 # Install the external acquire-zarr library
 install(FILES 
   ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-zarr${CMAKE_SHARED_LIBRARY_SUFFIX} 
-  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-logger${CMAKE_SHARED_LIBRARY_SUFFIX} 
   DESTINATION 
   lib)
 
@@ -78,6 +77,14 @@ if(BUILD_TESTING)
   # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(${PROJECT_NAME}_write_zarr_raw test/write_zarr_raw.cpp)
+  target_include_directories(${PROJECT_NAME}_write_zarr_raw PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  target_link_libraries(${PROJECT_NAME}_write_zarr_raw zarr_writer_node)
 endif()
 
 ament_package()
