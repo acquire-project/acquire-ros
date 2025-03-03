@@ -30,34 +30,34 @@ target_include_directories(zarr_writer_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${ACQUIRE_ZARR_INSTALL_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
-  )
+)
 
-target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_20)  # Require C99 and C++20
+target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_20) # Require C99 and C++20
 
-rclcpp_components_register_node(zarr_writer_node 
-  PLUGIN "acquire_zarr::ImageZarrWriterNode" 
+rclcpp_components_register_node(zarr_writer_node
+  PLUGIN "acquire_zarr::ImageZarrWriterNode"
   EXECUTABLE image_zarr_writer_node)
 
-rclcpp_components_register_node(zarr_writer_node 
-  PLUGIN "acquire_zarr::Float32MultiArrayZarrWriterNode" 
+rclcpp_components_register_node(zarr_writer_node
+  PLUGIN "acquire_zarr::Float32MultiArrayZarrWriterNode"
   EXECUTABLE float_volume_zarr_writer)
 
 target_link_directories(zarr_writer_node PUBLIC $<BUILD_INTERFACE:${ACQUIRE_ZARR_INSTALL_DIR}/lib>)
-target_link_libraries(zarr_writer_node acquire-zarr) 
+target_link_libraries(zarr_writer_node acquire-zarr)
 
 # Install the library and executables
 ament_export_targets(export_zarr_writer_node)
 install(TARGETS zarr_writer_node
-        EXPORT export_zarr_writer_node
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin
+  EXPORT export_zarr_writer_node
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 # Install the external acquire-zarr library
-install(FILES 
-  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-zarr${CMAKE_SHARED_LIBRARY_SUFFIX} 
-  DESTINATION 
+install(FILES
+  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-zarr${CMAKE_SHARED_LIBRARY_SUFFIX}
+  DESTINATION
   lib)
 
 # Install launch & config files.
