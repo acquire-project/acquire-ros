@@ -23,6 +23,7 @@ namespace acquire_zarr
     rclcpp::Subscription<T>::SharedPtr image_sub_;
 
     ZarrStreamSettings zarr_stream_settings_ = {};
+    ZarrCompressionSettings zarr_compression_settings_ = {};
     ZarrStream* zarr_stream_ = nullptr;
 
     // string variables which are members so the memory can persist 
