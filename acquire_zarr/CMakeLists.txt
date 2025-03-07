@@ -32,32 +32,33 @@ target_include_directories(zarr_writer_node PUBLIC
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 
-target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_20) # Require C99 and C++20
+target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_20)  # Require C99 and C++20
 
-rclcpp_components_register_node(zarr_writer_node
-  PLUGIN "acquire_zarr::ImageZarrWriterNode"
+rclcpp_components_register_node(zarr_writer_node 
+  PLUGIN "acquire_zarr::ImageZarrWriterNode" 
   EXECUTABLE image_zarr_writer_node)
 
-rclcpp_components_register_node(zarr_writer_node
-  PLUGIN "acquire_zarr::Float32MultiArrayZarrWriterNode"
+rclcpp_components_register_node(zarr_writer_node 
+  PLUGIN "acquire_zarr::Float32MultiArrayZarrWriterNode" 
   EXECUTABLE float_volume_zarr_writer)
 
 target_link_directories(zarr_writer_node PUBLIC $<BUILD_INTERFACE:${ACQUIRE_ZARR_INSTALL_DIR}/lib>)
-target_link_libraries(zarr_writer_node acquire-zarr)
+target_link_libraries(zarr_writer_node acquire-zarr) 
 
 # Install the library and executables
 ament_export_targets(export_zarr_writer_node)
 install(TARGETS zarr_writer_node
-  EXPORT export_zarr_writer_node
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+        EXPORT export_zarr_writer_node
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
 )
 
 # Install the external acquire-zarr library
-install(FILES
-  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-zarr${CMAKE_SHARED_LIBRARY_SUFFIX}
-  DESTINATION
+install(FILES 
+  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-zarr${CMAKE_SHARED_LIBRARY_SUFFIX} 
+  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-logger${CMAKE_SHARED_LIBRARY_SUFFIX} 
+  DESTINATION 
   lib)
 
 # Install launch & config files.
@@ -68,7 +69,7 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
-  # find_package(ament_lint_auto REQUIRED)
+  find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
   # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
@@ -76,20 +77,7 @@ if(BUILD_TESTING)
   # comment the line when this package is in a git repo and when
   # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
-  set(ament_cmake_flake8_FOUND TRUE)
-  set(ament_cmake_lint_cmake_FOUND TRUE)
-  set(ament_cmake_pep257_FOUND TRUE)
-  set(ament_cmake_uncrustify_FOUND TRUE)
-  set(ament_cmake_xmllint_FOUND TRUE)
-  # ament_lint_auto_find_test_dependencies()
-
-  find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(${PROJECT_NAME}_write_zarr_raw test/write_zarr_raw.cpp)
-  target_include_directories(${PROJECT_NAME}_write_zarr_raw PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-  )
-  target_link_libraries(${PROJECT_NAME}_write_zarr_raw zarr_writer_node)
+  ament_lint_auto_find_test_dependencies()
 endif()
 
 ament_package()
