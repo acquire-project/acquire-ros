@@ -127,14 +127,14 @@ namespace acquire_zarr
   }
 
   template <>
-  void ZarrWriterNode<sensor_msgs::msg::Image>::topic_callback(const sensor_msgs::msg::Image &msg) const
+  void ZarrWriterNode<sensor_msgs::msg::Image>::topic_callback(const sensor_msgs::msg::Image& msg) const
   {
     size_t size_out = 0;
     ZarrStream_append(zarr_stream_, msg.data.data(), msg.data.size(), &size_out);
   }
 
   template <typename T>
-  void ZarrWriterNode<T>::topic_callback(const T &msg) const
+  void ZarrWriterNode<T>::topic_callback(const T& msg) const
   {
     if (msg.layout.dim.size() != zarr_stream_settings_.dimension_count - 1)
     {
