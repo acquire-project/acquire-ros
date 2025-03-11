@@ -30,7 +30,7 @@ target_include_directories(zarr_writer_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${ACQUIRE_ZARR_INSTALL_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
-  )
+)
 
 target_compile_features(zarr_writer_node PUBLIC c_std_99 cxx_std_20)  # Require C99 and C++20
 
@@ -56,8 +56,7 @@ install(TARGETS zarr_writer_node
 
 # Install the external acquire-zarr library
 install(FILES 
-  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-zarr${CMAKE_SHARED_LIBRARY_SUFFIX} 
-  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-logger${CMAKE_SHARED_LIBRARY_SUFFIX} 
+  ${ACQUIRE_ZARR_INSTALL_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}acquire-zarr${CMAKE_SHARED_LIBRARY_SUFFIX}
   DESTINATION 
   lib)
 
