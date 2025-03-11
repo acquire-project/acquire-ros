@@ -11,6 +11,17 @@
 
 using std::placeholders::_1;
 
+namespace
+{
+  std::string
+  to_lowercase(const std::string &s)
+  {
+    std::string result = s;
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    return result;
+  }
+}
+
 namespace acquire_zarr
 {
   template <typename T>
@@ -38,7 +49,6 @@ namespace acquire_zarr
   template <typename T>
   void ZarrWriterNode<T>::settings_from_params()
   {
-
     zarr_stream_settings_.version = ZarrVersion_3;
 
     this->declare_parameter<std::string>("zarr_out_path", "out.zarr");
@@ -60,6 +70,20 @@ namespace acquire_zarr
       throw std::runtime_error("Unsupported data type");
     }
 
+    this->declare_parameter("zarr_format", 3);
+    const auto zarr_format = this->get_parameter("zarr_format").as_int();
+    switch (zarr_format)
+    {
+    case 2:
+      zarr_stream_settings_.version = ZarrVersion_2;
+      break;
+    case 3:
+      zarr_stream_settings_.version = ZarrVersion_3;
+      break;
+    default:
+      throw std::runtime_error("Unsupported Zarr format version: " + std::to_string(zarr_format));
+    }
+
     this->declare_parameter("dimension_names", std::vector<std::string>{"t", "y", "x"});
     dimension_names_ = this->get_parameter("dimension_names").as_string_array();
     auto n_dimensions = dimension_names_.size();
@@ -77,7 +101,7 @@ namespace acquire_zarr
     auto dimension_shard_chunks = this->get_parameter("dimension_shard_chunks").as_integer_array();
 
     this->declare_parameter("compression_codec", "none");
-    const auto compression_codec = this->get_parameter("compression_codec").as_string();
+    const auto compression_codec = to_lowercase(this->get_parameter("compression_codec").as_string());
 
     this->declare_parameter("compression_level", 1);
     const auto compression_level = this->get_parameter("compression_level").as_int();
@@ -101,23 +125,23 @@ namespace acquire_zarr
           (uint32_t)dimension_shard_chunks[i]};
     }
 
-    if (compression_codec.lower() != "none")
+    if (compression_codec != "none")
     {
-      zarr_compression_settings_.compressor = ZarrCompressor_Blosc;
+      zarr_compression_settings_.compressor = ZarrCompressor_Blosc1;
       zarr_compression_settings_.level = compression_level;
       zarr_compression_settings_.shuffle = compression_shuffle;
 
-      if (compression_codec.lower() == "lz4")
+      if (compression_codec == "lz4")
       {
         zarr_compression_settings_.codec = ZarrCompressionCodec_BloscLZ4;
       }
-      else if (compression_codec.lower() == "zstd")
+      else if (compression_codec == "zstd")
       {
         zarr_compression_settings_.codec = ZarrCompressionCodec_BloscZstd;
       }
       else
       {
-        throw std::runtime_error("Unsupported compression codec: '" + compression_codec + "'")
+        throw std::runtime_error("Unsupported compression codec: '" + compression_codec + "'");
       }
 
       zarr_stream_settings_.compression_settings = &zarr_compression_settings_;
