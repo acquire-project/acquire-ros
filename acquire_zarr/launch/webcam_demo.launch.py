@@ -30,11 +30,15 @@ def generate_launch_description():
         package='acquire_zarr', 
         executable='image_zarr_writer_node', 
         parameters=[{
-            'zarr_path': zarr_out_path,
+            'zarr_out_path': zarr_out_path,
             'dimension_sizes': [0, image_height, image_width],
-            'chunk_sizes': [1, image_height, image_width],
+            'dimension_names': ['time', 'height', 'width'],
+            'dimension_types': [2, 0, 0],
+            'dimension_chunk_px': [1, image_height, image_width],
+            'dimension_shard_chunks': [1, 1, 1],
         }],
-        output='screen')
+        output='screen',
+        remappings=[('/image_data', '/image_raw')])
 
     # List of nodes, arguements, etc to add to the launch description.
     return launch.LaunchDescription([
