@@ -9,28 +9,35 @@
 
 namespace acquire_zarr
 {
-  template <typename T>
-  class ZarrWriterNode : public rclcpp::Node
+template<typename T>
+class ZarrWriterNode : public rclcpp::Node
+{
+public:
+  ZarrWriterNode(const rclcpp::NodeOptions);
+  ~ZarrWriterNode();
+
+private:
+  void settings_from_params();
+
+  void topic_callback(const T & msg) const;
+
+  // The single array this node streams into, owned by zarr_stream_settings_.
+  const ZarrArraySettings & array_settings() const
   {
-  public:
-    ZarrWriterNode(const rclcpp::NodeOptions);
-    ~ZarrWriterNode();
-  private:
-    void settings_from_params();
+    return zarr_stream_settings_.arrays[0];
+  }
 
-    void topic_callback(const T & msg) const;
+  rclcpp::Subscription<T>::SharedPtr image_sub_;
 
-    rclcpp::Subscription<T>::SharedPtr image_sub_;
+  ZarrStreamSettings zarr_stream_settings_ = {};
+  ZarrCompressionSettings zarr_compression_settings_ = {};
+  ZarrStream * zarr_stream_ = nullptr;
 
-    ZarrStreamSettings zarr_stream_settings_ = {};
-    ZarrCompressionSettings zarr_compression_settings_ = {};
-    ZarrStream* zarr_stream_ = nullptr;
-
-    // string variables which are members so the memory can persist 
-    // throughout the lifetime of the node
-    std::string store_path_;
-    std::vector<std::string> dimension_names_;
-  };
+  // string variables which are members so the memory can persist
+  // throughout the lifetime of the node
+  std::string store_path_;
+  std::vector<std::string> dimension_names_;
+};
 
 }  // namespace acquire_zarr
 
