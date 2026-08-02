@@ -10,8 +10,17 @@
   <depend>rclcpp_components</depend>
   <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Needed to bootstrap the vendored vcpkg that builds acquire-zarr. -->
+  <build_depend>curl</build_depend>
+  <build_depend>git</build_depend>
+  <build_depend>ninja-build</build_depend>
+  <build_depend>pkg-config</build_depend>
+  <build_depend>unzip</build_depend>
+  <build_depend>zip</build_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -16,7 +16,7 @@ include(ExternalProject)
 # Define acquire-zarr-driver as an ExternalProject
 set(AZ_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/acquire-zarr-library-build)
 set(AZ_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/acquire-zarr-library-install)
-ExternalProject_Add(
+externalproject_add(
         acquire-zarr-library
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/acquire-zarr-library
         BINARY_DIR ${AZ_BUILD_DIR}

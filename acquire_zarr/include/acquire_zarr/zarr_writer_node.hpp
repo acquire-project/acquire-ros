@@ -20,13 +20,19 @@ namespace acquire_zarr
 
     void topic_callback(const T & msg) const;
 
+    // The single array this node streams into, owned by zarr_stream_settings_.
+    const ZarrArraySettings & array_settings() const
+    {
+      return zarr_stream_settings_.arrays[0];
+    }
+
     rclcpp::Subscription<T>::SharedPtr image_sub_;
 
     ZarrStreamSettings zarr_stream_settings_ = {};
     ZarrCompressionSettings zarr_compression_settings_ = {};
     ZarrStream* zarr_stream_ = nullptr;
 
-    // string variables which are members so the memory can persist 
+    // string variables which are members so the memory can persist
     // throughout the lifetime of the node
     std::string store_path_;
     std::vector<std::string> dimension_names_;
